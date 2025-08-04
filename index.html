@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('https://source.unsplash.com/1600x900/?nature,water'); /* Change this URL to customize background */
+      background-size: cover;
+      background-position: center;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    header input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+    }
+
+    header button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+    }
+
+    main {
+      padding: 100px 20px 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .link-card {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .link-card a {
+      color: #00f0ff;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .actions {
+      margin-top: 10px;
+    }
+
+    .actions button {
+      margin: 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .edit-btn {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      header input[type="text"] {
+        width: 60%;
+      }
+
+      .modal-content {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <input type="text" id="searchInput" placeholder="Search links..." />
+    <button onclick="openModal()">Add Link</button>
+  </header>
+
+  <main>
+    <div class="grid" id="linkGrid"></div>
+  </main>
+
+  <!-- Modal Form -->
+  <div class="modal" id="linkModal">
+    <div class="modal-content">
+      <h3 id="modalTitle">Add New Link</h3>
+      <input type="text" id="siteName" placeholder="Website Name" />
+      <input type="url" id="siteURL" placeholder="https://example.com" />
+      <button onclick="saveLink()">Save</button>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('linkModal');
+    const linkGrid = document.getElementById('linkGrid');
+    const siteName = document.getElementById('siteName');
+    const siteURL = document.getElementById('siteURL');
+    const modalTitle = document.getElementById('modalTitle');
+    const searchInput = document.getElementById('searchInput');
+
+    let links = JSON.parse(localStorage.getItem('links')) || [];
+    let editIndex = null;
+
+    function renderLinks() {
+      linkGrid.innerHTML = '';
+      const filtered = links.filter(link =>
+        link.name.toLowerCase().includes(searchInput.value.toLowerCase())
+      );
+      filtered.forEach((link, index) => {
+        const card = document.createElement('div');
+        card.className = 'link-card';
+        card.innerHTML = `
+          <a href="${link.url}" target="_blank">${link.name}</a>
+          <div class="actions">
+            <button class="edit-btn" onclick="editLink(${index})">Edit</button>
+            <button class="delete-btn" onclick="deleteLink(${index})">Delete</button>
+          </div>
+        `;
+        linkGrid.appendChild(card);
+      });
+    }
+
+    function openModal() {
+      modal.style.display = 'flex';
+      siteName.value = '';
+      siteURL.value = '';
+      editIndex = null;
+      modalTitle.textContent = 'Add New Link';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    function saveLink() {
+      const name = siteName.value.trim();
+      const url = siteURL.value.trim();
+
+      if (!name || !url) {
+        alert('Please fill in both fields.');
+        return;
+      }
+
+      if (editIndex !== null) {
+        links[editIndex] = { name, url };
+      } else {
+        links.push({ name, url });
+      }
+
+      localStorage.setItem('links', JSON.stringify(links));
+      renderLinks();
+      closeModal();
+    }
+
+    function deleteLink(index) {
+      if (confirm('Are you sure you want to delete this link?')) {
+        links.splice(index, 1);
+        localStorage.setItem('links', JSON.stringify(links));
+        renderLinks();
+      }
+    }
+
+    function editLink(index) {
+      editIndex = index;
+      siteName.value = links[index].name;
+      siteURL.value = links[index].url;
+      modalTitle.textContent = 'Edit Link';
+      modal.style.display = 'flex';
+    }
+
+    // Close modal when clicking outside content
+    window.onclick = function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Filter on search
+    searchInput.addEventListener('input', renderLinks);
+
+    // Initial render
+    renderLinks();
+  </script>
+</body>
+</html>
