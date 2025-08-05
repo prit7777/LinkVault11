@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -15,8 +15,10 @@
     <button onclick="openModal()">Add Link</button>
   </header>
 
-  <main>
-    <div class="grid" id="linkGrid"></div>
+  <main id="linkContainer">
+    <section class="hero">
+        <h1>Your Links</h1>
+    </section>
   </main>
 
   <div class="modal" id="linkModal">
@@ -30,7 +32,7 @@
 
   <script>
     const modal = document.getElementById('linkModal');
-    const linkGrid = document.getElementById('linkGrid');
+    const linkContainer = document.getElementById('linkContainer');
     const siteName = document.getElementById('siteName');
     const siteURL = document.getElementById('siteURL');
     const modalTitle = document.getElementById('modalTitle');
@@ -38,31 +40,52 @@
 
     let links = JSON.parse(localStorage.getItem('links')) || [];
     let editIndex = null;
+    
+    // An array of background images for the parallax sections.
+    // Replace these with your own high-resolution images!
+    const backgroundImages = [
+        'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2070&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1948&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1974&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1950&auto=format&fit=crop'
+    ];
 
     function renderLinks() {
-      linkGrid.innerHTML = '';
+      // Keep the hero section, clear only the links
+      const existingLinks = linkContainer.querySelectorAll('.link-section');
+      existingLinks.forEach(link => link.remove());
+
       const searchTerm = searchInput.value.toLowerCase();
       const filtered = links.filter(link =>
         link.name.toLowerCase().includes(searchTerm)
       );
 
-      // Find the original index for editing/deleting after filtering
       const findOriginalIndex = (linkToFind) => {
           return links.findIndex(link => link.name === linkToFind.name && link.url === linkToFind.url);
       }
 
-      filtered.forEach((link) => {
+      filtered.forEach((link, i) => {
         const originalIndex = findOriginalIndex(link);
-        const card = document.createElement('div');
-        card.className = 'link-card';
-        card.innerHTML = `
-          <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.name}</a>
-          <div class="actions">
-            <button class="edit-btn" onclick="editLink(${originalIndex})">Edit</button>
-            <button class="delete-btn" onclick="deleteLink(${originalIndex})">Delete</button>
+
+        // Create a <section> for each link for the parallax effect
+        const section = document.createElement('section');
+        section.className = 'link-section';
+
+        // Cycle through the background images
+        const bgImage = backgroundImages[i % backgroundImages.length];
+        section.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('${bgImage}')`;
+        
+        // The content (link and buttons) goes inside the section
+        section.innerHTML = `
+          <div class="link-content">
+            <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.name}</a>
+            <div class="actions">
+              <button class="edit-btn" onclick="editLink(${originalIndex})">Edit</button>
+              <button class="delete-btn" onclick="deleteLink(${originalIndex})">Delete</button>
+            </div>
           </div>
         `;
-        linkGrid.appendChild(card);
+        linkContainer.appendChild(section);
       });
     }
 
@@ -88,7 +111,6 @@
         return;
       }
       
-      // Automatically add https:// if missing
       if (!url.match(/^[a-zA-Z]+:\/\//)) {
           url = 'https://' + url;
       }
@@ -122,21 +144,18 @@
       siteName.focus();
     }
 
-    // Close modal when clicking outside content
     window.onclick = function(e) {
       if (e.target === modal) {
         closeModal();
       }
     }
     
-    // Close modal with escape key
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
             closeModal();
         }
     });
 
-    // Filter on search
     searchInput.addEventListener('input', renderLinks);
 
     // Initial render
