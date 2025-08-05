@@ -58,18 +58,33 @@
     header button {
       padding: 10px 20px;
       font-size: 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-style: italic;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      background-color: #28a745;
+      background: linear-gradient(45deg, #28a745, #20c997);
       color: white;
       transition: all 0.3s ease;
-      font-family: 'Poppins', sans-serif;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
     }
     
     header button:hover {
         filter: brightness(1.2);
         transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+        letter-spacing: 2px;
+    }
+    
+    header button:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+        filter: brightness(0.9);
+        transition: all 0.1s ease;
     }
 
     main {
