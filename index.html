@@ -14,7 +14,7 @@
     <input type="text" id="searchInput" placeholder="Search links..." />
     <button onclick="openModal()">Add Link</button>
   </header>
-
+<div data-netlify-identity-menu></div>
   <main id="linkContainer">
     <section class="hero">
         <h1>Your Links</h1>
@@ -161,6 +161,7 @@
     // Initial render
     renderLinks();
   </script>
+<script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </body>
 <script type="module">
   // Import the functions you need from the SDKs you need
